@@ -11,6 +11,7 @@ namespace Schnittpunkte.Models
         public Punkt? Punkt2 { get; set; }
         public Linie? Linie2 { get; set; }
         public Kreis? Kreis2 { get; set; }
+        public Ellipse? Ellipse2 { get; set; }
 
     }
 
@@ -38,6 +39,12 @@ namespace Schnittpunkte.Models
 
     public class Kreis
     {
+        public Kreis()
+        {
+            this.H = 0;
+            this.K = 0;
+            this.R = 1;
+        }
         public double H { get; set; }
         public double K { get; set; }
         public double R { get; set; }
@@ -59,5 +66,23 @@ namespace Schnittpunkte.Models
         public Punkt? punkt { get; set; }
         public Punkt? punkt2 { get; set; }
         public RequestForm? request { get; set; }
+    }
+
+    public class Ellipse : Kreis
+    {
+        public Ellipse()
+        {
+            this.A = 1;
+            this.B = 1;
+        }
+
+        public double A { get; set; }
+
+        public double B { get; set; }
+
+        public bool IsValid()
+        {
+            return this.A > 0 && this.B > 0;
+        }
     }
 }

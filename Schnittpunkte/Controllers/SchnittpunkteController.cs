@@ -28,6 +28,7 @@ namespace Schnittpunkte.Controllers
         public IActionResult CalculateIntersection([FromBody] RequestForm request)
         {
             Result intersects = _schnittpunkteService.CalculateIntersection(request);
+            
             if (intersects == null) 
             {
                 return BadRequest("Invalid Request");

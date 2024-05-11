@@ -15,13 +15,14 @@ namespace Schnittpunkte.Services
         /// If the request is valid, returns a Result object with status "valid".
         /// If the request is invalid (e.g., does not contain exactly two geometric objects or Linie1 is missing), returns a Result object with status "Invalid" and a message indicating the reason for invalidity.
         /// </returns>
-        public Result? RequestValidation(RequestForm request) 
+        public Result? RequestValidation(RequestForm request)
         {
             List<object> objs = new List<object>();
-            if(request.Linie1 != null) objs.Add(request.Linie1);
-            if(request.Linie2 != null) objs.Add(request.Linie2);
-            if(request.Punkt2 != null) objs.Add(request.Punkt2);
-            if(request.Kreis2 != null) objs.Add(request.Kreis2);
+            if (request.Linie1 != null) objs.Add(request.Linie1);
+            if (request.Linie2 != null) objs.Add(request.Linie2);
+            if (request.Punkt2 != null) objs.Add(request.Punkt2);
+            if (request.Kreis2 != null) objs.Add(request.Kreis2);
+            if (request.Ellipse2 != null) objs.Add(request.Ellipse2);
             if (objs.Count != 2 || request.Linie1 == null)
             {
                 var result = new Result
@@ -51,7 +52,7 @@ namespace Schnittpunkte.Services
         {
             if (this.RequestValidation(request).status == "valid")
             {
-                if (request.Linie1.IsValid() == false)
+                if (!request.Linie1.IsValid())
                 {
                     var result = new Result
                     {
@@ -61,9 +62,10 @@ namespace Schnittpunkte.Services
                     return result;
                 }
 
-                else 
+                else
                 {
-                    if (request.Punkt2 != null && request.Linie2 == null && request.Kreis2 == null)
+                    // isvalid means that the request contains Linie1 and only one another geometric object
+                    if (request.Punkt2 != null)
                     {
 
 
@@ -72,13 +74,13 @@ namespace Schnittpunkte.Services
                         {
                             status = "valid",
                             result = intersects ? "Der Punkt liegt auf der Linie." : "Der Punkt liegt nicht auf der Linie.",
-                            punkt = intersects ? (Punkt)request.Punkt2: null
+                            punkt = intersects ? (Punkt)request.Punkt2 : null
                         };
 
                         return result;
 
                     }
-                    else if (request.Punkt2 == null && request.Linie2 != null && request.Kreis2 == null)
+                    else if (request.Linie2 != null)
                     {
                         if (request.Linie2.IsValid() == false)
                         {
@@ -125,7 +127,7 @@ namespace Schnittpunkte.Services
                             }
                         }
                     }
-                    else if (request.Punkt2 == null && request.Linie2 == null && request.Kreis2 != null)
+                    /*else if (request.Kreis2 != null)
                     {
                         if (request.Kreis2.IsValid() == false)
                         {
@@ -150,20 +152,103 @@ namespace Schnittpunkte.Services
                             }
                             else
                             {
-                                
+                                if (intersects.Length > 1)
+                                {
+                                    var result = new Result
+                                    {
+                                        status = "valid",
+                                        result = (intersects[1].X == intersects[0].X && intersects[0].Y == intersects[1].Y) ? "Die Linie und der Kreis berühren sich." : "Die Linie und der Kreis schneiden sich.",
+                                        punkt = intersects[0],
+                                        punkt2 = (intersects[1].X == intersects[0].X && intersects[0].Y == intersects[1].Y) ? null : intersects[1]
+                                    };
+                                    return result;
+                                }
+                                else if (intersects.Length == 1)
+                                {
+                                    var result = new Result
+                                    {
+                                        status = "valid",
+                                        result = "Die Linie und der Kreis berühren sich.",
+                                        punkt = intersects[0]
+                                    };
+                                    return result;
+                                }
+                                else
+                                {
+                                    return null;
+                                }
+                            }
+                        }
+
+                    }*/
+                    else if (request.Ellipse2 != null || request.Kreis2!=null)
+                    {
+                        if (request.Ellipse2 != null && request.Ellipse2.IsValid==null)
+                        {
+                            
+                            var result = new Result
+                            {
+                                status = "Invalid",
+                                message = "Ellipse2 ist ungültig; a und b muessen positiv sein."
+                            };
+                            return result;
+                            
+                        }
+                        if (request.Kreis2 != null && request.Kreis2.IsValid() == false)
+                        {
+                            var result = new Result
+                            {
+                                status = "Invalid",
+                                message = "Ellipse2 ist ungültig; a und b muessen positiv sein."
+                            };
+                            return result;
+                            
+                        }
+                        
+                        else
+                        {
+                            Punkt[] intersects = this.CalculateIntersectionLineWithEllipseOrCircle(request.Linie1,ellipse: request.Ellipse2, kreis: request.Kreis2);
+                            if (intersects == null)
+                            {
                                 var result = new Result
                                 {
                                     status = "valid",
-                                    result = (intersects.Length>1 && intersects[1].X == intersects[0].X && intersects[0].Y == intersects[1].Y) ? "Die Linie und der Kreis berühren sich." : "Die Linie und der Kreis schneiden sich.",
-                                    punkt = intersects[0],
-                                    punkt2 = (intersects.Length > 1 && intersects[1].X == intersects[0].X && intersects[0].Y == intersects[1].Y) ? null : intersects[1]
+                                    result = "Es gibt keine Schnittpunkt."
                                 };
                                 return result;
+                            }
+                            else
+                            {
+                                if (intersects.Length > 1)
+                                {
+                                    var result = new Result
+                                    {
+                                        status = "valid",
+                                        result = (intersects[1].X == intersects[0].X && intersects[0].Y == intersects[1].Y) ? "Sie berühren sich." : "Sie schneiden sich.",
+                                        punkt = intersects[0],
+                                        punkt2 = (intersects[1].X == intersects[0].X && intersects[0].Y == intersects[1].Y) ? null : intersects[1]
+                                    };
+                                    return result;
+                                }
+                                else if (intersects.Length == 1)
+                                {
+                                    var result = new Result
+                                    {
+                                        status = "valid",
+                                        result = "Sie berühren sich.",
+                                        punkt = intersects[0]
+                                    };
+                                    return result;
+                                }
+                                else
+                                {
+                                    return null;
+                                }
                                 
+
 
                             }
                         }
-                        
                     }
                     else
                     {
@@ -176,12 +261,12 @@ namespace Schnittpunkte.Services
                         return result;
                     }
                 }
-                
+
             }
             else
             {
                 return this.RequestValidation(request);
-                
+
             }
             return null;
         }
@@ -260,14 +345,14 @@ namespace Schnittpunkte.Services
             {
                 return null;
             }
-            else if (discriminant == 0) 
+            else if (discriminant == 0)
             {
                 return new List<double> { (-B) / (2 * A) };
 
             }
             return new List<double> { (-B + Math.Sqrt(discriminant)) / (2 * A), (-B - Math.Sqrt(discriminant)) / (2 * A) };
-            
-            
+
+
         }
         /// <summary>
         /// Calculates the intersection points between a line and a circle.
@@ -290,23 +375,54 @@ namespace Schnittpunkte.Services
             double h = kreis.H;
             double k = kreis.K;
             double r = kreis.R;
-           
 
-            // coefficients for the quadratic equation
-            double A = (a * a + b * b);
-            double B = -2 * h * (b * b) + 2 * a * c + 2 * a * k * b;
-            double C = (h * h) * (b * b) + (c * c) + (k * k) * (b * b) + 2 * k * c * b - (r * r) * (b * b);
-
-            // discriminant
-            List<double> XX = this.QuadraticEquation(A, B, C);
-
-            // null means that discriminant is negative => No intersection
-            if (XX == null)
+            if (b == 0)
             {
-                return null; 
+                double A = 1;
+                double B = -2 * h;
+                double C = (h * h) + (-c/a * -c/a) - 2 * k * -c/a - (r * r) + (k * k);
+                
+                //double xx = -1 * c / a;
+                List<double> YY = this.QuadraticEquation(A, B, C);
+                if (YY == null)
+                {
+                    return null;
+                }
+                if (YY.Count > 1)
+                {
+                    return new Punkt[]
+                        {
+                            new Punkt { X = -1*c/a, Y = YY[0] },
+                            new Punkt { X = -1*c/a, Y = YY[1] } // here XX[1] == XX[0] ;)
+                        };
+                }
+                else if (YY.Count == 1)
+                {
+                    return new Punkt[]
+                        {
+                            new Punkt { X = -1*c/a, Y = YY[0] }
+                        };
+                }
+                else
+                {
+                    return null;
+                }
             }
-            if (b!=0) // Calculate the point/points
+            else
             {
+                // coefficients for the quadratic equation
+                double A = (a * a + b * b);
+                double B = -2 * h * (b * b) + 2 * a * c + 2 * a * k * b;
+                double C = (h * h) * (b * b) + (c * c) + (k * k) * (b * b) + 2 * k * c * b - (r * r) * (b * b);
+
+                // discriminant
+                List<double> XX = this.QuadraticEquation(A, B, C);
+
+                // null means that discriminant is negative => No intersection
+                if (XX == null)
+                {
+                    return null;
+                }
                 if (XX.Count > 1)
                 { // Two Points
                     double y1 = (-a * XX[0] - c) / b;
@@ -326,50 +442,118 @@ namespace Schnittpunkte.Services
                             };
                 }
                 else return null;
-
-            }
-            else 
-            {
-                //this case b=0 to avoid dividing by 0
-                double AA = 1;
-                double BB = -2 * h ;
-                double CC = (h * h) + (XX[0] * XX[0]) - 2 * k * XX[0] - (r * r) + (k * k);
-                List<double> YY = this.QuadraticEquation(AA, BB, CC);
                 
-                double discriminant1 = BB * BB - 4 * AA * CC;
-                if (YY != null)
+            }
+            
+
+
+
+        }
+
+        
+        /// <summary>
+        /// Calculates the intersection points between a line and an ellipse or circle.
+        /// </summary>
+        /// <param name="linie">The line.</param>
+        /// <param name="ellipse">The ellipse (optional). If not provided, a circle must be provided.</param>
+        /// <param name="kreis">The circle (optional). If not provided, an ellipse must be provided.</param>
+        /// <returns>
+        /// An array of points representing the intersection points between the line and the ellipse,
+        /// or null if there are no intersection points.
+        /// </returns>
+        /// <remarks>
+        /// This method calculates the intersection points between a line and an ellipse in a 2D plane.
+        /// The line is represented by its coefficients (A, B, C) in the standard form of a linear equation: Ax + By + C = 0.
+        /// The ellipse is represented by its center coordinates (H, K) and the lengths of its semi-major and semi-minor axes (A, B).
+        /// </remarks>
+        public Punkt[]? CalculateIntersectionLineWithEllipseOrCircle(Linie linie, Ellipse ellipse=null, Kreis kreis=null)
+        {
+            if (ellipse==null && kreis==null)
+            { return null; }    
+            // null means .... No intersection......
+
+            double a = linie.A;
+            double b = linie.B;
+            double c = linie.C;
+            double h = ellipse!=null? ellipse.H : kreis.H;
+            double k = ellipse != null ? ellipse.K : kreis.K;
+            double a_ellipse = ellipse != null ? ellipse.A : 1;
+            double b_ellipse = ellipse != null ? ellipse.B : 1;
+            double r = ellipse != null ? 1: kreis.R;
+            if (b == 0)
+            {
+                /*double A = 1;
+                double B = -2 * h;
+                double C = (h * h) + (-c/a * -c/a) - 2 * k * -c/a - (r * r) + (k * k);*/
+
+                //double xx = -1 * c / a;
+                double A = a_ellipse * a_ellipse;
+                double B = -2 * k * (a_ellipse * a_ellipse) ;
+                double C = (k * k) * (a_ellipse * a_ellipse) -1 * (r * r) * (b_ellipse * b_ellipse) * (a_ellipse * a_ellipse) + (b_ellipse * b_ellipse) * (-1*c/a - h) * (-1 * c / a - h);
+                /*double A = a_ellipse * a_ellipse;
+                double B = -2 * k * (a_ellipse * a_ellipse);
+                double C = (k * k) * (a_ellipse * a_ellipse) - 1 * (r * r) * (b_ellipse * b_ellipse) * (a_ellipse * a_ellipse) +
+                    (b_ellipse * b_ellipse) * (-1 * c / a - h) * (-1 * c / a - h);
+*/
+                List<double> YY = this.QuadraticEquation(A, B, C);
+                if (YY == null)
                 {
-                    if (YY.Count > 1)
-                    {
-                        //Two Points
-                        double y1 = (-BB + Math.Sqrt(discriminant1)) / (2 * AA);
-                        double y2 = (-BB - Math.Sqrt(discriminant1)) / (2 * AA);
-                        return new Punkt[]
+                    return null;
+                }
+                if (YY.Count>1)
+                {
+                    return new Punkt[]
+                        {
+                            new Punkt { X = -1*c/a, Y = YY[0] },
+                            new Punkt { X = -1*c/a, Y = YY[1] } // here XX[1] == XX[0] ;)
+                        };
+                }
+                else if (YY.Count == 1)
+                {
+                    return new Punkt[]
+                        {
+                            new Punkt { X = -1*c/a, Y = YY[0] }
+                        };
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                // coefficients for the quadratic equation
+                double A = (a * a * a_ellipse * a_ellipse + b * b * b_ellipse * b_ellipse);
+                double B = -2 * h * (b * b) * (b_ellipse * b_ellipse) + 2 * a * c * (a_ellipse * a_ellipse) * b + 2 * a * k * b * (a_ellipse * a_ellipse);
+                double C = (h * h) * (b * b) * (b_ellipse * b_ellipse) + (c * c) * (a_ellipse * a_ellipse) + (a_ellipse * a_ellipse) * (k * k) * (b * b) + 2 * k * c * b * (a_ellipse * a_ellipse) - (a_ellipse * a_ellipse) * (b_ellipse * b_ellipse) * (b * b) * (r * r);
+                
+                // discriminant
+                List<double> XX = this.QuadraticEquation(A, B, C);
+                // null means that discriminant is negative => No intersection
+                if (XX == null )
+                {
+                    return null;
+                }
+                if (XX.Count > 1)
+                { // Two Points
+                    double y1 = (-a * XX[0] - c) / b;
+                    double y2 = (-a * XX[1] - c) / b;
+                    return new Punkt[]
                             {
                                 new Punkt { X = XX[0], Y = y1 },
                                 new Punkt { X = XX[1], Y = y2 }
                             };
-                    }
-                    else if (YY.Count == 1)
-                    {
-                        // One Point
-                        double y1 = (-BB + Math.Sqrt(discriminant1)) / (2 * AA);
-                        return new Punkt[]
+                }
+                else if (XX.Count == 1)
+                { // One Point
+                    double y1 = (-a * XX[0] - c) / b;
+                    return new Punkt[]
                             {
                                 new Punkt { X = XX[0], Y = y1 }
                             };
-                    }
-                    else return null;
-
-
                 }
                 else return null;
-
             }
-
-            
-
         }
-    
     }
 }
