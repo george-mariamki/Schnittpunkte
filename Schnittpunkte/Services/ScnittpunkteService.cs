@@ -480,6 +480,8 @@ namespace Schnittpunkte.Services
             double a_ellipse = ellipse != null ? ellipse.A : 1;
             double b_ellipse = ellipse != null ? ellipse.B : 1;
             double r = ellipse != null ? 1: kreis.R;
+            Console.WriteLine("A  " + a + "  B  " + b + "  C  " + c + "  h  " + h);
+            Console.WriteLine("k  " + k + "  aa  " + a_ellipse + "  b  " + b_ellipse + "  r  " + r);
             if (b == 0)
             {
                 /*double A = 1;
@@ -523,12 +525,19 @@ namespace Schnittpunkte.Services
             else
             {
                 // coefficients for the quadratic equation
-                double A = (a * a * a_ellipse * a_ellipse + b * b * b_ellipse * b_ellipse);
-                double B = -2 * h * (b * b) * (b_ellipse * b_ellipse) + 2 * a * c * (a_ellipse * a_ellipse) * b + 2 * a * k * b * (a_ellipse * a_ellipse);
-                double C = (h * h) * (b * b) * (b_ellipse * b_ellipse) + (c * c) * (a_ellipse * a_ellipse) + (a_ellipse * a_ellipse) * (k * k) * (b * b) + 2 * k * c * b * (a_ellipse * a_ellipse) - (a_ellipse * a_ellipse) * (b_ellipse * b_ellipse) * (b * b) * (r * r);
+                double A = (a * a * a_ellipse * a_ellipse 
+                    + b * b * b_ellipse * b_ellipse);
+                double B = -2 * h * (b * b) * (b_ellipse * b_ellipse) 
+                    + 2 * a * c * (a_ellipse * a_ellipse) //* b 
+                    + 2 * a * k * b * (a_ellipse * a_ellipse);
+                double C = h * (b * b) * (b_ellipse * b_ellipse) + (c * c) * (a_ellipse * a_ellipse) 
+                    + (a_ellipse * a_ellipse) * (k * k) * (b * b) 
+                    + 2 * k * c * b * (a_ellipse * a_ellipse) 
+                    - (a_ellipse * a_ellipse) * (b_ellipse * b_ellipse) * (b * b) * (r * r);
                 
                 // discriminant
                 List<double> XX = this.QuadraticEquation(A, B, C);
+                Console.WriteLine("A  " + A + "  B  " + B + "  C  " + C + "  XX  " + XX);
                 // null means that discriminant is negative => No intersection
                 if (XX == null )
                 {

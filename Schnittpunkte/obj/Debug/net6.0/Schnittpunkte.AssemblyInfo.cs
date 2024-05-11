@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Schnittpunkte")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+eb87d770c5bc986dc7fa2b34ac649ea077a7231e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4e088720676202933e83a149b4eb869efd366c55")]
 [assembly: System.Reflection.AssemblyProductAttribute("Schnittpunkte")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Schnittpunkte")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
