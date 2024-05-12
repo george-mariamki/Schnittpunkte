@@ -54,15 +54,70 @@ This is a RESTful API designed to calculate intersections between geometric obje
 -------------
 
 - **POST /api/intersection**: Calculate the intersection of geometric objects based on the provided request.
-    - Request Body (Only 2 Objects Linie1 and one of Linie2, Punkt2, Kreis2 or Ellipse2):
+    - Request Body: (the valid request contains Only 2 Objects Linie1 and one of Linie2, Punkt2, Kreis2 or Ellipse2)
         ```json
-        {   "Linie1": {     "A": 1,     "B": 2,     "C": -3   },   "Linie2": {     "A": 2,     "B": -1,     "C": 5   },   "Punkt2": {     "X": 2,     "Y": 3   },   "Kreis2": {     "H": 0,     "K": 0,     "R": 2   },     "Ellipse2": {     "H": 0,     "K": 0,     "R": 2,     "A": 0,     "B": 0   }  }
+        {
+            "Linie1": {
+                "A": 0,
+                "B": 0,
+                "C": 0
+            },
+            "Linie2": {
+                "A": 0,
+                "B": 0,
+                "C": 0
+            },
+            "Punkt2": {
+                "X": 0,
+                "Y": 0
+            },
+            "Kreis2": {
+                "H": 0,
+                "K": 0,
+                "R": 0
+            },
+            "Ellipse2": {
+                "H": 0,
+                "K": 0,
+                "R": 0,
+                "A": 0,
+                "B": 0
+            }
+        }
         ```
-    - Response:
+    - Example Request Body:
         ```json
-        {   "status": "valid",   "result": "The lines intersect ",   "punkt": {     "X": 1,     "Y": 2   } }
+        {
+            "Linie1": {
+                "A": 1,
+                "B": 1,
+                "C": 1
+            },
+            "Linie2": {
+                "A": 2,
+                "B": 1,
+                "C": 2
+            }
+        }
         ```
-    - InvalidResponse:
+
+    - Exapmle Response: (it contains the status, result and the intersection point(s) )
         ```json
-        {   "status": "Invalid",   "message": "Invalid Request"}
+        {
+            "status": "valid",
+            "result": "Die Linien schneiden sich.",
+            "punkt": {
+                "x": -1,
+                "y": 0
+              },
+        }
+        ```
+
+
+    - InvalidResponse: (it contains the status and message )
+        ```json
+        {
+            "status": "Invalid",
+            "message": "Invalid Request"
+        }
         ```  
